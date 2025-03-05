@@ -52,6 +52,7 @@ function App({ }) {
         paddingRight={10}
         height={"90vh"}
         boxSizing={"border-box"}
+        marginTop={5}
       >
         <GridItem colSpan={2} backgroundColor={"bg.emphasized"} paddingTop={3} paddingBottom={3} >
           <Flex direction={"column"} align={"flex-start"}>
