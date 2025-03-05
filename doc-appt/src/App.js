@@ -1,118 +1,176 @@
-import logo from './logo.svg';
-import './App.css';
-import { ChakraProvider, Grid, Box, GridItem, Text, Button, ButtonGroup, Table, Thead, Tr, Th, Td } from "@chakra-ui/react"
-import React, { useState, useEffect } from 'react';
+import { Provider } from "@/components/ui/provider";
+import {
+  TimelineConnector,
+  TimelineContent, TimelineItem, TimelineRoot, TimelineTitle
+} from "@/components/ui/timeline";
+import {
+  Button, Card, Flex, Grid, GridItem, Heading,
+  Switch,
+  Table, Text
+} from '@chakra-ui/react';
+
+import { useEffect, useState } from 'react';
 import Header from './Header';
 
-function DoctorButtons(props) {
-  return (
-  <Button 
-    size="md"
-    height="48px"
-    width="200px"
-    border="2px"
-    borderColor="green.500">
-      {props.value}
-  </Button>);
-}
-
-function App({component}) {
+function App({ }) {
 
   const [data, setData] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(0);
+  const [selectedButton, setSelectedButton] = useState(0);
+  const [checked, setChecked] = useState(false)
 
   const getData = () => {
     fetch('data.json',
-    {
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-       }
-    }
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      }
     )
-      .then(function(response){
+      .then(function (response) {
         console.log(response)
         return response.json();
       })
-      .then(function(myJson) {
+      .then(function (myJson) {
         console.log(myJson);
         setData(myJson)
         setSelectedDoctor(0)
-        //editDoctors()
       });
   }
   useEffect(() => {
     getData()
-  },[])
-
-  // const editDoctors = () => {
-  //   var docs = []
-  //   for (const item in data) {
-  //     docs.append(item.name)
-  //   }
-  //   setDoctors(docs)
-  //   //setDoctors(data && data.length > 0 && data.map((item) => item.name))
-  //   console.log(doctors)
-  // }
+  }, [])
 
 
   return (
-    <ChakraProvider>
-      <Header/>
+    <Provider>
+      <Header />
       <Grid
         templateColumns="repeat(5, 1fr)"
-        gap={1}
+        gap={10}
+        paddingRight={10}
+        height={"90vh"}
+        boxSizing={"border-box"}
       >
-        <GridItem colSpan={2} >
-        {
-          data && data.length > 0 && data.map((item) => <Button 
-              size="md"
-              height="48px"
-              width="200px"
-              key={item.index}
-              value={item.name} 
-              backgroundColor="white"
-              onClick={() => setSelectedDoctor(item.index)}
-              >
-                {item.name}
-              </Button>
+        <GridItem colSpan={2} backgroundColor={"bg.emphasized"} paddingTop={3} paddingBottom={3} >
+          <Flex direction={"column"} align={"flex-start"}>
+            <Heading paddingLeft={6} paddingBottom={3}>Physicians</Heading>
+            {
+              data && data.length > 0 && data.map((item) =>
+                <Button
+                  size="md"
+                  colorPalette={selectedButton == item.index ? "blue" : "bg"}
+                  key={item.index}
+                  value={item.name}
+                  width={"100%"}
+                  justifyContent={"flex-start"}
+                  paddingLeft={10}
+                  variant={selectedButton == item.index ? "solid" : "ghost"}
+                  onClick={() => {
+                    setSelectedDoctor(item.index);
+                    setSelectedButton(item.index);
+                  }
+                  }
+                >
+                  {item.name}
+                </Button>
               )
-        }
-        {/* {
-          doctors.map((doctor) =>
-            <DoctorButtons 
-            key={doctor.toString()}
-            value={doctor} 
-            onClick={doctor => setSelectedDoctor(doctor)}/>
-          )
-        } */}
+            }
+          </Flex>
         </GridItem>
-        <GridItem colSpan={3} >
-          <Table variant="simple">
-            <Thead>
-              <Th>#</Th>
-              <Th>Name</Th>
-              <Th>Time</Th>
-              <Th>Kind</Th>
-            </Thead>
-          {
-            data.length > 0 &&
-            data[selectedDoctor].appointments 
-            && data[selectedDoctor].appointments.length > 0 
-            && data[selectedDoctor].appointments.map
-              ((item) => 
-              <Tr>
-              <Td>{item.id} </Td>
-              <Td>{item.name} </Td>
-              <Td>{item.time} </Td>
-              <Td>{item.kind} </Td>
-              </Tr> )
-          }
-          </Table>
+        <GridItem colSpan={3}>
+
+          <Grid templateColumns="repeat(6, 1fr)"
+            gap={10}>
+            <GridItem colSpan={4}>
+              {data[selectedDoctor] ?
+                (<div>
+                  <Heading>{data[selectedDoctor].name}</Heading>
+                  <Text>{data[selectedDoctor].email}</Text></div>) : <br />
+              }
+
+            </GridItem>
+            <GridItem colSpan={2}>
+              <Switch.Root
+                checked={checked}
+                onCheckedChange={(e) => setChecked(e.checked)}
+                mb={10}
+                mt={3}
+              >
+                <Switch.HiddenInput />
+                <Switch.Label>Timeline View</Switch.Label>
+
+                <Switch.Control>
+
+                  <Switch.Thumb />
+                </Switch.Control>
+                <Switch.Label>Table View</Switch.Label>
+
+              </Switch.Root>
+            </GridItem>
+          </Grid>
+
+
+
+          {checked ?
+            (<Table.Root variant={"outline"}>
+              <Table.Header background={"bg.info"} color={"white"} textDecorationColor={"white"}>
+                <Table.Row>
+                  <Table.ColumnHeader>Time</Table.ColumnHeader>
+                  <Table.ColumnHeader>Name</Table.ColumnHeader>
+                  <Table.ColumnHeader>Kind</Table.ColumnHeader>
+                </Table.Row>
+
+              </Table.Header>
+              <Table.Body>
+                {
+                  data.length > 0 &&
+                  data[selectedDoctor].appointments
+                  && data[selectedDoctor].appointments.length > 0
+                  && data[selectedDoctor].appointments.map
+                    ((item) =>
+                      <Table.Row>
+                        <Table.Cell>{item.time} </Table.Cell>
+                        <Table.Cell>{item.name} </Table.Cell>
+                        <Table.Cell>{item.kind} </Table.Cell>
+                      </Table.Row>)
+                }
+              </Table.Body>
+            </Table.Root>) :
+            (<TimelineRoot colorPalette={"blue"}>
+              {data.length > 0 &&
+                data[selectedDoctor].appointments
+                && data[selectedDoctor].appointments.length > 0 &&
+                data[selectedDoctor].appointments.map
+                  ((item) => (
+                    <TimelineItem>
+                      <TimelineContent width="20" mt="2">
+                        <TimelineTitle whiteSpace="nowrap">{item.time}</TimelineTitle>
+                      </TimelineContent>
+                      <TimelineConnector mt="2">
+                        {item.id}
+                      </TimelineConnector>
+                      <TimelineContent>
+                        <Card.Root >
+
+                          <Card.Body lineHeight="tall">
+                            <Card.Title>{item.name}</Card.Title>
+                            <Card.Description>{item.kind}</Card.Description>
+
+                          </Card.Body>
+                          {/* <Card.Footer>
+                            ABCD
+                          </Card.Footer> */}
+                        </Card.Root>
+                      </TimelineContent>
+                    </TimelineItem>
+                  ))}
+            </TimelineRoot>)}
         </GridItem>
       </Grid>
-      
-    </ChakraProvider>
+
+    </Provider >
   );
 }
 
