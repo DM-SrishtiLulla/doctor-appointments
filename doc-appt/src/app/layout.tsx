@@ -5,8 +5,10 @@ import type { Metadata } from "next";
 import React from "react";
 
 export const metadata: Metadata = {
-  title: "React App",
-  description: "Web site created with Next.js.",
+  title: "Doctor Appointment Display",
+  description:
+    "A React app for visualizing daily appointments per doctor from JSON data.",
+  icons: "stethoscope.png",
 };
 
 export default function RootLayout(props: { children: React.ReactNode }) {
